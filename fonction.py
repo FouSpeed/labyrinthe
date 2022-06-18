@@ -4,6 +4,8 @@ import random
 #import numpy as np
 import math
 
+from pyparsing import col
+
 def changeValue(array, x, y, value):
 	"""changer le nbr dans array de coordonnées [x,y] par la valeur "value"
 		variables : 
@@ -47,39 +49,42 @@ def next (x, y, rangeRow, rangeCol):
 	values = [x,y]
 	return values
 
-def voisinBord(array):
+def voisinBord(rows, cols):
     # renvoie les coordonnées d'un nouveau point touchant le bord du labyrinthe
-    # array : tableau de meme dimensions que le labyrinthe
-    xBord = random.randint(0, len(array)-1)
-    yBord = random.randint(0, len(array[0])-1)
-    while xBord != 0 and xBord != len(array[0])-1 and yBord != 0 and yBord != len(array)-1:
-        xBord = random.randint(0, len(array)-1)
-        yBord = random.randint(0, len(array[0])-1)
+	# rows : nombre de lignes du labyrinthe
+	# cols : nombre de colonnes du labyrinthe
+    xBord = random.randint(0, cols-1)
+    yBord = random.randint(0, rows-1)
+    while xBord != 0 and xBord != rows-1 and yBord != 0 and yBord != cols-1:
+        xBord = random.randint(0, cols-1)
+        yBord = random.randint(0, rows-1)
     return [xBord, yBord]
 
 
-def arreteBord(array):
+def arreteBord(rows, cols):
     # crée les arrêtes autour du labyrinthe
-	# array : tableau de meme dimensions que le labyrinthe
-    plt.plot([0 , len(array)-1], [0,0], color='k', lw= 5) # Sud
-    plt.plot([len(array)-1,len(array)-1],[0,len(array[0])-1],color='k', lw= 5) # Est
-    plt.plot([0,0],[ 0 , len(array[0])-1], color='k', lw= 5) # ouest
-    plt.plot([0,len(array)-1], [len(array[0])-1,len(array[0])-1], color='k', lw= 5) # Nord
+	# rows : nombre de lignes du labyrinthe
+	# cols : nombre de colonnes du labyrinthe
+	plt.plot([0 , rows-1], [0,0], color='k', lw= 5) # Sud
+	plt.plot([rows-1,rows-1],[0,cols-1],color='k', lw= 5) # Est
+	plt.plot([0,0],[ 0 , cols-1], color='k', lw= 5) # ouest
+	plt.plot([0,rows-1], [cols-1,cols-1], color='k', lw= 5) # Nord
 
 
-def _enter(array):
+def _enter(cols):
     # renvoie les coordonnées l'entrée du labyrinthe
-	# array : tableau de meme dimensions que le labyrinthe
+	# rows : nombre de lignes du labyrinthe
 	xEnter = 0
-	yEnter = random.randint(0, len(array[0])-2)
+	yEnter = random.randint(0, cols-2)
 	plt.plot([xEnter, xEnter],[yEnter, yEnter+1], color = "w", lw= 5)
 	return [xEnter, yEnter]
 	
-def _exit(array):
+def _exit(rows, cols):
     # renvoie les coordonnées la sortie du labyrinthe
-	# array : tableau de meme dimensions que le labyrinthe
-	xExit = len(array)-1
-	yExit =  random.randint(0, len(array[0])-2)
+	# rows : nombre de lignes du labyrinthe
+	# cols : nombre de colonnes du labyrinthe
+	xExit = rows-1
+	yExit =  random.randint(0, cols-2)
 	plt.plot([xExit, xExit],[yExit, yExit +1], color = "w", lw= 5)
 	return [xExit, yExit]	
 
@@ -91,27 +96,27 @@ def labyrinthe(rows, cols):
 	arr = [[0 for i in range (cols)] for j in range(rows)]
 
 	# Identify random original point
-	oRow = random.randint(0, len(arr)-1)
-	oCol = random.randint(0, len(arr[0])-1)
-	while oRow != 0 and oRow != len(arr)-1 and oCol != 0 and oCol != len(arr[0])-1:
-		oRow = random.randint(0, len(arr)-1)
-		oCol = random.randint(0, len(arr[0])-1)
+	oRow = random.randint(0, rows-1)
+	oCol = random.randint(0, cols-1)
+	while oRow != 0 and oRow != rows-1 and oCol != 0 and oCol != cols-1:
+		oRow = random.randint(0, rows-1)
+		oCol = random.randint(0, cols-1)
 			
 	# Initialize number max of possible sommets, number of remaining sommets and list of arretes
-	sommetMax = rows * cols 
 	sommetRemaining = rows * cols  #-1 pour le point d'origine
 	arrete = []
 
 	#Construction de l'arbre
 	sommet = [oRow, oCol]
+	print("sommet origine = " + str(sommet))
 	while sommetRemaining > 0:
 		nextSommet = next(sommet[0], sommet[1], rows-1, cols-1)
 		valueNextSommet = int(arr[nextSommet[0]][nextSommet[1]])
 		if valueNextSommet == 0:
-			if nextSommet[0] == 0 or nextSommet[0] == len(arr[0])-1 or nextSommet[1] == 0 or nextSommet[1] == len(arr)-1:
+			if nextSommet[0] == 0 or nextSommet[0] == cols-1 or nextSommet[1] == 0 or nextSommet[1] == rows-1:
 				changeValue(arr, nextSommet[0], nextSommet[1], 1)
 				sommetRemaining -= 1
-				sommet = voisinBord(arr)
+				sommet = voisinBord(rows, cols)
 				nextSommet = next(sommet[0], sommet[1], rows-1, cols-1)
 			else:
 				changeValue(arr, nextSommet[0], nextSommet[1], 1)
@@ -121,9 +126,10 @@ def labyrinthe(rows, cols):
 				sommet = nextSommet
 		elif valueNextSommet == 1:
 			sommet = nextSommet
-	arreteBord(arr)
-	enter = _enter(arr)
-	exit = _exit(arr)
+	arreteBord(rows, cols)
+	enter = _enter(cols)
+	exit = _exit(rows, cols)
+	print (arr)
 	return [arrete, enter, exit]
 
 
