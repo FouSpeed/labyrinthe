@@ -1,10 +1,8 @@
 #/bin/python
 from matplotlib import pyplot as plt
-import random, math, time, itertools
+import random
 #import numpy as np
 import math
-import sys
-import logging
 
 def changeValue(array, x, y, value):
 	"""changer le nbr dans array de coordonnées [x,y] par la valeur "value"
@@ -25,17 +23,13 @@ def next (x, y, rangeRow, rangeCol):
 		rangeRow: nombre de lignes
 		rangeCol: nombre de colonnes
 	"""
-	
 	# initialise variables
 	test = False
 	xOriginalValue= x
 	yOriginalValue = y
-	#logging.info("original value x : " + str(xOriginalValue))
-	#logging.info("original value y : " + str(yOriginalValue))	
-	
+
 	while test == False :
 		direction = random.choice(["N", "S", "E", "W"])
-		#logging.info("direction: " + str(direction))
 		if direction == "N":
 			y -= 1
 		elif direction == "S":
@@ -46,33 +40,16 @@ def next (x, y, rangeRow, rangeCol):
 			x -= 1
 		if x >= 0 and x <= rangeRow and  y>=0 and y <= rangeCol:
 			test = True
-			#logging.info("final value x : " + str(x))
-			#logging.info("final value y : " + str(y))
 		else:
-			#revenir a l'ancienne valeure
-			#logging.info('Destination not in the array. Try to find another point.')
 			x = xOriginalValue
 			y = yOriginalValue
 			
 	values = [x,y]
 	return values
 
-def bordLabyrinthe (array):
-    #au bord du tableau les point sont égaux à 2 
-	for x in range(len(array)):
-		changeValue(array, x, 0, 2)
-		changeValue(array, x, len(array[0])-1, 2)
-	for y in range(len(array[1])):
-		changeValue(array, 0, y, 2)
-		changeValue(array, len(array)-1, y, 2)
-
-def toucheBord(value):
-    if value == 2:
-        return True
-    else:
-        return False
-
 def voisinBord(array):
+    # renvoie les coordonnées d'un nouveau point touchant le bord du labyrinthe
+    # array : tableau de meme dimensions que le labyrinthe
     xBord = random.randint(0, len(array)-1)
     yBord = random.randint(0, len(array[0])-1)
     while xBord != 0 and xBord != len(array[0])-1 and yBord != 0 and yBord != len(array)-1:
@@ -82,6 +59,8 @@ def voisinBord(array):
 
 
 def arreteBord(array):
+    # crée les arrêtes autour du labyrinthe
+	# array : tableau de meme dimensions que le labyrinthe
     plt.plot([0 , len(array)-1], [0,0], color='k', lw= 5) # Sud
     plt.plot([len(array)-1,len(array)-1],[0,len(array[0])-1],color='k', lw= 5) # Est
     plt.plot([0,0],[ 0 , len(array[0])-1], color='k', lw= 5) # ouest
@@ -89,66 +68,54 @@ def arreteBord(array):
 
 
 def _enter(array):
+    # renvoie les coordonnées l'entrée du labyrinthe
+	# array : tableau de meme dimensions que le labyrinthe
 	xEnter = 0
 	yEnter = random.randint(0, len(array[0])-2)
 	plt.plot([xEnter, xEnter],[yEnter, yEnter+1], color = "w", lw= 5)
 	return [xEnter, yEnter]
 	
 def _exit(array):
+    # renvoie les coordonnées la sortie du labyrinthe
+	# array : tableau de meme dimensions que le labyrinthe
 	xExit = len(array)-1
 	yExit =  random.randint(0, len(array[0])-2)
 	plt.plot([xExit, xExit],[yExit, yExit +1], color = "w", lw= 5)
-	
 	return [xExit, yExit]	
-#input
 
 def labyrinthe(rows, cols):
-	# Create array
+	# crée un labyrinthe, et retourne l'ensemble des arrêtes du  labyrinthe, les coordonnées de la case de départ, les coordonnées de la case de sortie
+	# rows : nombre de lignes du labyrinthe
+	# cols: nombre de colonnes du labyrinthe
 
 	arr = [[0 for i in range (cols)] for j in range(rows)]
 
 	# Identify random original point
 	oRow = random.randint(0, len(arr)-1)
 	oCol = random.randint(0, len(arr[0])-1)
-
 	while oRow != 0 and oRow != len(arr)-1 and oCol != 0 and oCol != len(arr[0])-1:
-		logging.info(str(oRow) + "," + str(oCol) + " : Ca touche pas le bord , on cherche un nouveau point d'origine")
 		oRow = random.randint(0, len(arr)-1)
 		oCol = random.randint(0, len(arr[0])-1)
-	logging.info("point d'origine : " + str(oRow) + "," + str(oCol))
 			
-			
-	# Initialize number max of possible sommets and number remaining sommets
+	# Initialize number max of possible sommets, number of remaining sommets and list of arretes
 	sommetMax = rows * cols 
 	sommetRemaining = rows * cols  #-1 pour le point d'origine
-	logging.info("Max de sommets pouvant être construits : " + str(sommetMax))	
-
 	arrete = []
-	#Construction de l'arbre
 
+	#Construction de l'arbre
 	sommet = [oRow, oCol]
 	while sommetRemaining > 0:
-		logging.info("sommets restants : " + str(sommetRemaining))
 		nextSommet = next(sommet[0], sommet[1], rows-1, cols-1)
-		logging.info("next sommet : " + str(nextSommet))
 		valueNextSommet = int(arr[nextSommet[0]][nextSommet[1]])
-		logging.info("valeur nouveau sommet : " + str(valueNextSommet))
-		logging.info("original value of the next sommet: " + str(valueNextSommet))
 		if valueNextSommet == 0:
 			if nextSommet[0] == 0 or nextSommet[0] == len(arr[0])-1 or nextSommet[1] == 0 or nextSommet[1] == len(arr)-1:
-				logging.info("Ca touche le bord")
 				changeValue(arr, nextSommet[0], nextSommet[1], 1)
 				sommetRemaining -= 1
 				sommet = voisinBord(arr)
-				logging.info("sommet : " + str(sommet))
 				nextSommet = next(sommet[0], sommet[1], rows-1, cols-1)
-				logging.info("next sommet2 : " + str(nextSommet))
 			else:
-				logging.info("value of next sommet is 0. It will be changed")
 				changeValue(arr, nextSommet[0], nextSommet[1], 1)
-				logging.info("l'arrête formée est: " + str(sommet) + " " + str(nextSommet))
 				plt.plot([sommet[0] , nextSommet[0]], [sommet[1] , nextSommet[1]], color='k')
-				#print([[sommet[0] , sommet[1]], [nextSommet[0] , nextSommet[1]]])
 				arrete += [[[sommet[0] , sommet[1]], [nextSommet[0] , nextSommet[1]]]]
 				sommetRemaining -= 1
 				sommet = nextSommet
@@ -157,7 +124,85 @@ def labyrinthe(rows, cols):
 	arreteBord(arr)
 	enter = _enter(arr)
 	exit = _exit(arr)
-	return [arrete, enter, exit, arr]
+	return [arrete, enter, exit]
+
+
+def initialisationDistance(cols, rows):
+    # initialise une valeur max sur l'ensemble des cases du labyrinthe
+	# cols = abscisse
+	# rows = ordonnées
+	valeurs = [[cols*rows*10 for i in range(cols)]for j in range(rows)]
+	return valeurs
+
+def rv(arrete):
+	return [arrete[1],arrete[0]]
+
+def possibleWay(arrete , position, row, col):
+    # renvoie l'ensemble des sorties possible d'une case
+	# arrete : liste des arrêtes du labyrinthe
+	# position : coordonnées [x,y] de la position actuelle
+	# row : nombre de lignes du labyrinthe
+	# col : nombre de colonnes du labyrinthe
+	voisin = []
+	x, y = position[0], position[1]
+	arreteEst = [[x+1, y], [x+1, y+1]]
+	arreteWest = [[x, y],[ x, y+1]]
+	arreteSouth = [[x, y], [x+1, y]]
+	arreteNorth = [[x, y+1],[x+1, y+1]]
+	if (arreteEst not in arrete) and (rv(arreteEst) not in arrete) and x< col -1:
+		voisin.append([x+1, y])
+	if (arreteWest not in arrete) and (rv(arreteWest) not in arrete) and x > 0:	
+		voisin.append([x-1, y])
+	if (arreteSouth not in arrete) and (rv(arreteSouth) not in arrete)and position[1] > 0 :	
+		voisin.append([x, y-1])
+	if (arreteNorth not in arrete ) and (rv(arreteNorth) not in arrete)and position[1] < row -1:	
+		voisin.append([x, y+1])
+	return voisin
 
 
 
+def changeValueDistance(enter,arrete, row, col ):
+    # donne la valeur à chaque case du labyrinthe correspondant à la distance parcourue pour y accéder.
+    # enter : coordonnées de la case de départ
+	# arrete : liste de toutes les arrêtes du labyrinthe
+	# row : nombre de lignes du labyrinthe
+	# col : nombre de colonnes du labyrinthe
+	valeurs = [[col*row*10 for i in range(col)]for j in range(row)]
+	retour = [[[-1,-1] for i in range(col)]for j in range(row)]
+	retour[enter[1]][enter[0]]= enter
+	liste = [[enter, 0, enter]]
+	valeurs[enter[1]][enter[0]] = 0
+	while liste != []: # la liste est vide quand on a fait toutes les cases
+		l2 = []
+		for l in liste:
+			for v in possibleWay(arrete, l[0], row, col):
+				if valeurs[v[1]][v[0]] > l[1]+1:
+					valeurs[v[1]][v[0]] = l[1]+1
+					l2.append([v, l[1]+1, l[0]])
+					retour[v[1]][v[0]] = l[0]
+					plt.text(v[0]+0.5,v[1]+0.5,str(l[1]+1))
+		liste = l2
+	return [valeurs, retour]
+		
+def chemin(exit, retour):
+    # renvoie la liste des coordonnées des cases à utiliser pour aller de l'entrée à la sortie du labyrinthe 
+	# exit : coordonnées de la case de sortie
+	# retour : liste des cordonnées pour revenir au point de départ
+	point = [exit[0]-1, exit[1]]
+	chemin = [point]
+	while True : 
+		X = retour[point[1]][point[0]]
+		if X != point:
+			point = X
+			chemin.append(X)
+		else:
+			return chemin
+
+def plotChemin (Chemin):
+    # dessine un chemin
+	# chemin : liste des coordonnées des différents points à relier
+	for i in range (len(Chemin)-1):
+		Z = Chemin[i]
+		Zp = Chemin[i+1]
+		plt.plot([Z[0]+0.5, Zp[0]+0.5],[Z[1]+0.5, Zp[1]+0.5], color = "r", lw = 3)
+		
