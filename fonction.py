@@ -29,18 +29,17 @@ def next (x, y, rangeRow, rangeCol):
 	test = False
 	xOriginalValue= x
 	yOriginalValue = y
-
 	while test == False :
 		direction = random.choice(["N", "S", "E", "W"])
 		if direction == "N":
-			y -= 1
-		elif direction == "S":
 			y += 1
+		elif direction == "S":
+			y -= 1
 		elif direction == 'E':
 			x += 1
 		else:
 			x -= 1
-		if x >= 0 and x <= rangeRow and  y>=0 and y <= rangeCol:
+		if x >= 0 and x <= rangeRow and  y>=0 and y <= rangeCol :
 			test = True
 		else:
 			x = xOriginalValue
@@ -53,12 +52,12 @@ def voisinBord(rows, cols):
     # renvoie les coordonnées d'un nouveau point touchant le bord du labyrinthe
 	# rows : nombre de lignes du labyrinthe
 	# cols : nombre de colonnes du labyrinthe
-    xBord = random.randint(0, cols-1)
-    yBord = random.randint(0, rows-1)
-    while xBord != 0 and xBord != rows-1 and yBord != 0 and yBord != cols-1:
-        xBord = random.randint(0, cols-1)
-        yBord = random.randint(0, rows-1)
-    return [xBord, yBord]
+	xBord = random.randint(0, rows-1)
+	yBord = random.randint(0, cols-1)
+	while xBord != 0 and xBord != rows-1 and yBord != 0 and yBord != cols-1:
+		xBord = random.randint(0, rows-1)
+		yBord = random.randint(0, cols-1)
+	return [xBord, yBord]
 
 
 def arreteBord(rows, cols):
@@ -108,12 +107,11 @@ def labyrinthe(rows, cols):
 
 	#Construction de l'arbre
 	sommet = [oRow, oCol]
-	print("sommet origine = " + str(sommet))
 	while sommetRemaining > 0:
 		nextSommet = next(sommet[0], sommet[1], rows-1, cols-1)
 		valueNextSommet = int(arr[nextSommet[0]][nextSommet[1]])
 		if valueNextSommet == 0:
-			if nextSommet[0] == 0 or nextSommet[0] == cols-1 or nextSommet[1] == 0 or nextSommet[1] == rows-1:
+			if nextSommet[0] == 0 or nextSommet[0] == rows-1 or nextSommet[1] == 0 or nextSommet[1] == cols-1:
 				changeValue(arr, nextSommet[0], nextSommet[1], 1)
 				sommetRemaining -= 1
 				sommet = voisinBord(rows, cols)
@@ -129,7 +127,7 @@ def labyrinthe(rows, cols):
 	arreteBord(rows, cols)
 	enter = _enter(cols)
 	exit = _exit(rows, cols)
-	print (arr)
+	
 	return [arrete, enter, exit]
 
 
@@ -173,8 +171,8 @@ def changeValueDistance(enter,arrete, row, col ):
 	# arrete : liste de toutes les arrêtes du labyrinthe
 	# row : nombre de lignes du labyrinthe
 	# col : nombre de colonnes du labyrinthe
-	valeurs = [[col*row*10 for i in range(col)]for j in range(row)]
-	retour = [[[-1,-1] for i in range(col)]for j in range(row)]
+	valeurs = [[col*row*10 for i in range(row)]for j in range(col)]
+	retour = [[[-1,-1] for i in range(row)]for j in range(col)]
 	retour[enter[1]][enter[0]]= enter
 	liste = [[enter, 0, enter]]
 	valeurs[enter[1]][enter[0]] = 0
@@ -186,7 +184,7 @@ def changeValueDistance(enter,arrete, row, col ):
 					valeurs[v[1]][v[0]] = l[1]+1
 					l2.append([v, l[1]+1, l[0]])
 					retour[v[1]][v[0]] = l[0]
-					plt.text(v[0]+0.5,v[1]+0.5,str(l[1]+1))
+					#plt.text(v[0]+0.5,v[1]+0.5,str(l[1]+1))
 		liste = l2
 	return [valeurs, retour]
 		

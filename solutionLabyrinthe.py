@@ -5,8 +5,14 @@ from matplotlib import pyplot as plt
 from fonction import *
 
 # get inputs
-X = int(input("donner un abscisse : "))
-Y = int(input("donner une ordoonée : "))
+while True:
+    try :
+        taille = int(input("taille du labyrinthe : "))
+        break
+    except:
+        print ("Vous devez entrer un nombre")
+
+X = Y = taille
 
 # initialize labyrinthe
 arr = labyrinthe(X,Y)
